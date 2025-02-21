@@ -27,13 +27,14 @@ class GraphState(TypedDict):
     web_search: str
     documents: List[str]
     context: str
+    retry_count = 0
 
 # Inicialización de clientes
 vector_store = qdrant_client()  # Conectar con la base de datos vectorial Qdrant
 model = groq_client()  # Inicializar el cliente del modelo Groq
 
 # Configurar el retriever para recuperar documentos
-retriever = vector_store.as_retriever(search_kwargs={"k": 2})  # Recupera los 2 documentos más relevantes
+retriever = vector_store.as_retriever(search_kwargs={"k": 4})  # Recupera los 2 documentos más relevantes
 
 # Función para recuperar documentos desde Qdrant
 def retrieve(state):
@@ -98,8 +99,6 @@ def grade_documents(state: GraphState):
         # Evaluar la relevancia del documento
         score = retrieval_grader.invoke({"question": question, "document": d.page_content})
         grade = score['score']
-        print(grade)
-        
         if grade.lower() == "yes":
             print("---DOCUMENTO RELEVANTE---")
             filtered_docs.append(d)
@@ -205,41 +204,45 @@ def grade_generation_v_documents_and_question(state):
             - question: La pregunta del usuario.
             - documents: Los documentos recuperados.
             - generation: La respuesta generada por el modelo.
+            - retry_count: Número de intentos previos fallidos (opcional).
 
     Returns:
-        str: Decisión para el siguiente nodo a ejecutar ("useful", "not useful", o "not supported").
+        str: Decisión para el siguiente nodo a ejecutar ("useful", "not useful", "not supported" o "no data").
     """
 
     print("---VERIFICAR ALUCINACIONES---")
-    question = state["question"]  # Obtener la pregunta del estado actual
-    documents = state["documents"]  # Obtener los documentos recuperados
-    generation = state["generation"]  # Obtener la respuesta generada
+    question = state["question"]
+    documents = state["documents"]
+    generation = state["generation"]
 
-    # Verificar si la respuesta está basada en los documentos (no es una alucinación)
+    # Inicializar el contador de intentos si no está presente
+    if "retry_count" not in state:
+        state["retry_count"] = 0
+
+    # Verificar si la respuesta está basada en los documentos
     score = hallucination_grader.invoke({"documents": documents, "generation": generation})
-    grade = score['score']  # Obtener la calificación ("yes" o "no")
+    grade = score['score']
 
-    # Si la respuesta está basada en los documentos
     if grade == "yes":
         print("---DECISIÓN: LA RESPUESTA ESTÁ BASADA EN LOS DOCUMENTOS---")
-        
-        # Verificar si la respuesta responde adecuadamente a la pregunta
+
+        # Verificar si la respuesta responde a la pregunta
         print("---EVALUAR RESPUESTA vs PREGUNTA---")
         score = answer_grader.invoke({"question": question, "generation": generation})
-        grade = score['score']  # Obtener la calificación ("yes" o "no")
+        grade = score['score']
 
-        # Si la respuesta responde a la pregunta
         if grade == "yes":
             print("---DECISIÓN: LA RESPUESTA RESPONDE A LA PREGUNTA---")
-            return "useful"  # Retornar "useful" (útil)
+            return "useful"
         else:
             print("---DECISIÓN: LA RESPUESTA NO RESPONDE A LA PREGUNTA---")
-            return "not useful"  # Retornar "not useful" (no útil)
+            state["retry_count"] += 1
+            return "not useful" if state["retry_count"] < 2 else "useful"
     else:
-        # Si la respuesta no está basada en los documentos
         print("---DECISIÓN: LA RESPUESTA NO ESTÁ BASADA EN LOS DOCUMENTOS, REINTENTAR---")
-        return "not supported"  # Retornar "not supported" (no respaldada)
-    
+        state["retry_count"] += 1
+        return "not supported" if state["retry_count"] < 2 else "useful"
+
 
 workflow = StateGraph(GraphState)
 
@@ -298,14 +301,3 @@ workflow.add_conditional_edges(
 '''
 
 app = workflow.compile()
-
-
-
-
-
-# from pprint import pprint
-# inputs = {"question": "Que es la factura electronica, sifen y el kude?"}
-# for output in app.stream(inputs):
-#     for key, value in output.items():
-#         pprint(f"Finished running: {key}:")
-# pprint(value["generation"])

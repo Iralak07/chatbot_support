@@ -9,15 +9,21 @@ from database.qdrantDB import qdrant_client
 llm = groq_client()
 
 
-# Conectar con Qdrant
-vector_store = qdrant_client()
-retrieve = vector_store.as_retriever(search_kwargs={"k":4})
-
 prompt = PromptTemplate(
     template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
     Eres un evaluador experto en determinar la relevancia de documentos sobre facturación electrónica en Paraguay.  
     Evalúa si el documento recuperado es útil para responder la pregunta del usuario.  
     - El documento proviene del manual técnico del Sistema Integrado de Facturación Electrónica Nacional (SIFEN).  
+    - El manual cubre los siguientes temas (índice del manual):
+      1. Introducción, objetivos y alcance del SIFEN.
+      2. Estructura y subsistemas del SIFEN.
+      3. Documentos Tributarios Electrónicos (DTE): Comprobantes de ventas, documentos complementarios y Nota de Remisión Electrónica.
+      4. Modelo Operativo: Descriptores, plazos de transmisión, relación con contribuyentes, entrega y rechazo de DTE.
+      5. Características tecnológicas: Formato XML, firma digital, certificados digitales, estándares de comunicación.
+      6. Servicios Web del SIFEN: Recepción de documentos, consulta de lotes, consulta de RUC, recepción de eventos.
+      7. Gestión de eventos: Inutilización, cancelación, devolución, conformidad, disconformidad, desconocimiento de DTE.
+      8. Validaciones: Estructura de códigos de validación, validaciones de servicios web y formatos.
+      9. Gráfica (KUDE): Definición, estructura, campos, código QR y cinta de papel.
     - Un documento es relevante si contiene información específica sobre:
       - Facturación electrónica y su estructura en Paraguay.
       - Documentos tributarios electrónicos (DTE) y sus validaciones.

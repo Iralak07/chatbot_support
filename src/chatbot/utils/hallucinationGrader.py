@@ -18,7 +18,15 @@ prompt = PromptTemplate(
       - Contiene información no presente en los documentos.
       - Hace afirmaciones incorrectas o extrapola más allá de los hechos proporcionados.
       - Incluye interpretaciones subjetivas o especulativas.  
-      
+      - No está relacionada con los siguientes temas:  
+        - Facturación electrónica, incluyendo estructura, subsistemas y regulaciones (SIFEN).  
+        - Documentos tributarios electrónicos (DTE), comprobantes, notas de remisión y validaciones.  
+        - Modelos operativos, flujos de aprobación y transmisión de documentos electrónicos.  
+        - Características tecnológicas, estándares XML, firma digital y certificados.  
+        - Servicios web del SIFEN, protocolos de comunicación y validaciones.  
+        - Gestión de eventos, cancelaciones, conformidad/disconformidad y notificaciones.  
+        - Estructura y generación del Código de Control (CDC), código QR y KUDE.  
+
     Devuelve un JSON con una única clave 'score', cuyo valor será:  
     - 'yes' si la respuesta está respaldada por los documentos.  
     - 'no' si la respuesta no está respaldada por los documentos.  

@@ -97,11 +97,6 @@ Esto iniciará la aplicación en tu navegador web. La interfaz de usuario te per
 
 ---
 
-
-¡Claro! Aquí tienes la documentación descriptiva del archivo `app.py` sin incluir el código:
-
----
-
 # Dentro del proyecto tenemos los siguientes modulos
 
 ## app.y

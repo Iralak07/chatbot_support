@@ -3,6 +3,9 @@ from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from langchain_huggingface import HuggingFaceEmbeddings
+import os
+import dotenv
+dotenv.load_dotenv()
 
 hf_embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
@@ -16,7 +19,7 @@ class QdrantSingleton:
             # Configuración para Qdrant Cloud
             cls._instance.client = QdrantClient(
                 url="https://a5975a6b-e907-4020-8f5d-a85d9ae52f58.us-east4-0.gcp.cloud.qdrant.io", 
-                api_key="HIy8rqPa8uJcE0c15NBHcYB8O3CWmJiuPZ5S3wZ1-tEcAC6TZqTlzQ"
+                api_key=os.environ.get("QDRANT_API")
             )
             
             # Verificar si la colección existe, si no, crearla

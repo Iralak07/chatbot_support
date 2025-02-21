@@ -3,6 +3,8 @@
 ## Descripción del Proyecto
 Este proyecto implementa un chatbot de soporte técnico utilizando **Streamlit** como interfaz de usuario y **Groq** como proveedor de modelos de lenguaje. El chatbot está diseñado para responder preguntas relacionadas con el **Sistema Integrado de Facturación Electrónica Nacional (SIFEN)** en Paraguay. Además, utiliza una base de datos vectorial (**Qdrant**) para recuperar documentos relevantes y herramientas de búsqueda web para obtener información adicional cuando sea necesario.
 
+![Chatbot-de-Soporte-Técnico](https://github.com/user-attachments/assets/3b8c30b3-8682-468a-83d7-bc69da118e4b)
+
 ---
 
 ## Requisitos Previos
